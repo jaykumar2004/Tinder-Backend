@@ -1,27 +1,33 @@
 const express = require("express");
+const connectDb = require("./config/database.js");
+const User = require("./models/user.js");
 const app = express();
 
-const { adminAuth, userAuth } = require("./middlewares/auth.js");
-
-// auth middleware
-app.use("/admin", adminAuth);
-
-app.get("/user/login", (req, res) => {
-  res.send("User Login Successfully");
+app.post("/signup", async (req, res) => {
+  const user = new User({
+    //creating a new instance of the user model
+    firstName: "Jay Kumar",
+    lastName: "Jangid",
+    emailId: "jay@gmail.com",
+    password: "Jaykumar@2004",
+    age: 21,
+    gender: "Male",
+  });
+  try {
+    await user.save();
+    res.send("User Added");
+  } catch (err) {
+    res.status(400).send("User Not Found");
+  }
 });
 
-app.get("/user", userAuth, (req, res) => {
-  res.send("User Data");
-});
-
-app.get("/admin/data", (req, res) => {
-  res.send("Data Fetched");
-});
-
-app.get("/admin/deleteUser", (req, res) => {
-  res.send("User Deleted Successfully");
-});
-
-app.listen(3000, () => {
-  console.log("Server is litening to the port no. 3000");
-});
+connectDb()
+  .then(() => {
+    console.log("Database Connection Estbalished");
+    app.listen(3000, () => {
+      console.log("Server is litening to the port no. 3000");
+    });
+  })
+  .catch((error) => {
+    console.error("Database Cannot be Connected.");
+  });
