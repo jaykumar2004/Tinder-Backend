@@ -5,6 +5,32 @@ const app = express();
 
 app.use(express.json());
 
+//Get User by email
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    const users = await User.find({ emailId: userEmail });
+    if (users.length === 0) {
+      res.status(404).send("User not found");
+    } else {
+      res.send(users);
+    }
+  } catch (error) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+// Feed api - GET /feed - get all the users from the database
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (error) {
+    res.status(404).send("Something Went Wrong");
+  }
+});
+
+//signup api
 app.post("/signup", async (req, res) => {
   const user = new User(req.body);
   try {
@@ -12,6 +38,29 @@ app.post("/signup", async (req, res) => {
     res.send("User Added");
   } catch (err) {
     res.status(400).send("User Not Found");
+  }
+});
+
+//delete api
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    res.send("User Deleted");
+  } catch (error) {
+    res.status(404).send("Something Went Wrong");
+  }
+});
+
+//update user api
+app.patch("/user", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body;
+  try {
+    await User.findByIdAndUpdate({ _id: userId }, data); // or we can write (userId, data)
+    res.send("User Updated");
+  } catch (error) {
+    res.status(404).send("Something went wrong");
   }
 });
 
