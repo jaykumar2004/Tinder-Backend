@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const validator = require("validator");
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -19,10 +19,20 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       required: true,
       trim: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid email address : " + value);
+        }
+      },
     },
     password: {
       type: String,
       required: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Enter a strong password : " + value);
+        }
+      },
     },
     age: {
       type: Number,
@@ -40,6 +50,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         "https://media.istockphoto.com/id/1553217327/vector/user-profile-icon-avatar-person-sign-profile-picture-portrait-symbol-easily-editable-line.jpg?s=170667a&w=0&k=20&c=xUuHLFaa94WIFdV-XBgxX9SSsaJJgGQhE1Tmevqrytg=",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid Photo URL : " + value);
+        }
+      },
     },
     about: {
       type: String,

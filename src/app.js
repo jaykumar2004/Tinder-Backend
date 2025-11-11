@@ -1,9 +1,14 @@
 const express = require("express");
 const connectDb = require("./config/database.js");
 const User = require("./models/user.js");
+
+
 const app = express();
 
 app.use(express.json());
+
+
+
 
 //Get User by email
 app.get("/user", async (req, res) => {
@@ -20,6 +25,8 @@ app.get("/user", async (req, res) => {
   }
 });
 
+
+
 // Feed api - GET /feed - get all the users from the database
 app.get("/feed", async (req, res) => {
   try {
@@ -29,6 +36,9 @@ app.get("/feed", async (req, res) => {
     res.status(404).send("Something Went Wrong");
   }
 });
+
+
+
 
 //signup api
 app.post("/signup", async (req, res) => {
@@ -41,6 +51,8 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+
+
 //delete api
 app.delete("/user", async (req, res) => {
   const userId = req.body.userId;
@@ -52,29 +64,35 @@ app.delete("/user", async (req, res) => {
   }
 });
 
+
+
 //update user api
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
 
-  const ALLOWED_UPDATED = [
-    "userId",
-    "photoUrl",
-    "about",
-    "gender",
-    "age",
-    "skills",
-  ];
-
-  const isUpdateAllowed = Object.keys(data).every((k) =>
-    ALLOWED_UPDATED.includes(k)
-  );
-
-  if (!isUpdateAllowed) {
-    res.status(400).send("Update not allowed");
-  }
-
   try {
+    const ALLOWED_UPDATED = [
+      "userId",
+      "photoUrl",
+      "about",
+      "gender",
+      "age",
+      "skills",
+    ];
+
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATED.includes(k)
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error(" : Update Not Allowed");
+    }
+
+    if (data?.skills?.length > 10) {
+      throw new Error(" : Skills cannot be more than 10");
+    }
+
     await User.findByIdAndUpdate({ _id: userId }, data, {
       runValidators: true, // this is for the enbaling the validation
     }); // or we can write (userId, data)
