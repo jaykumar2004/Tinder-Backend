@@ -37,7 +37,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("User Added");
   } catch (err) {
-    res.status(400).send("User Not Found");
+    res.status(400).send(err.message);
   }
 });
 
@@ -57,10 +57,12 @@ app.patch("/user", async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
   try {
-    await User.findByIdAndUpdate({ _id: userId }, data); // or we can write (userId, data)
-    res.send("User Updated");
-  } catch (error) {
-    res.status(404).send("Something went wrong");
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true, // this is for the enbaling the validation
+    }); // or we can write (userId, data)
+    res.send("User Updated Successfully");
+  } catch (err) {
+    res.status(404).send("Update Failed" + err.message);
   }
 });
 
