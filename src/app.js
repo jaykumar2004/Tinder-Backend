@@ -1,14 +1,55 @@
 const express = require("express");
 const connectDb = require("./config/database.js");
 const User = require("./models/user.js");
-
+const bcrypt = require("bcrypt");
+const { validateSignupData } = require("./utils/validation.js");
 
 const app = express();
 
 app.use(express.json());
 
+//signup api
+app.post("/signup", async (req, res) => {
+  try {
+    //validation of data
+    validateSignupData(req);
 
+    const { firstName, lastName, emailId, password } = req.body;
+    //bcrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
 
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+
+    await user.save();
+    res.send("User Added");
+  } catch (err) {
+    res.status(400).send("Error : " + err.message);
+  }
+});
+
+//login api
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Invalid Credentials");
+    } else {
+      res.send("Login Successfully");
+    }
+  } catch (err) {
+    res.status(400).send("Error : " + err.message);
+  }
+});
 
 //Get User by email
 app.get("/user", async (req, res) => {
@@ -25,8 +66,6 @@ app.get("/user", async (req, res) => {
   }
 });
 
-
-
 // Feed api - GET /feed - get all the users from the database
 app.get("/feed", async (req, res) => {
   try {
@@ -36,22 +75,6 @@ app.get("/feed", async (req, res) => {
     res.status(404).send("Something Went Wrong");
   }
 });
-
-
-
-
-//signup api
-app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-  try {
-    await user.save();
-    res.send("User Added");
-  } catch (err) {
-    res.status(400).send(err.message);
-  }
-});
-
-
 
 //delete api
 app.delete("/user", async (req, res) => {
@@ -63,8 +86,6 @@ app.delete("/user", async (req, res) => {
     res.status(404).send("Something Went Wrong");
   }
 });
-
-
 
 //update user api
 app.patch("/user/:userId", async (req, res) => {
