@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       required: true,
+      unique: true,
       trim: true,
       validate(value) {
         if (!validator.isEmail(value)) {
@@ -93,18 +94,18 @@ userSchema.methods.validatePassword = async function (passwordInputByUser) {
 };
 
 //email check
-userSchema.pre("save", async function (next) {
-  const existingUser = await mongoose.models.User.findOne({
-    emailId: this.emailId,
-  });
+// userSchema.pre("save", async function (next) {
+//   const existingUser = await mongoose.models.User.findOne({
+//     emailId: this.emailId,
+//   });
 
-  if (existingUser) {
-    const err = new Error("Email already exists");
-    err.status = 400;
-    return next(err);
-  }
+//   if (existingUser) {
+//     const err = new Error("Email already exists");
+//     err.status = 400;
+//     return next(err);
+//   }
 
-  next();
-});
+//   next();
+// });
 
 module.exports = mongoose.model("User", userSchema);
