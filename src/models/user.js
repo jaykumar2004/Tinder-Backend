@@ -44,11 +44,15 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      validate(value) {
-        if (!["male", "female", "others"].includes(value)) {
-          throw new Error("Gender data is not valid");
-        }
+      enum: {
+        values: ["male", "female", "other"],
+        message: `{VALUE} is not a valid gender type`,
       },
+      // validate(value) {
+      //   if (!["male", "female", "others"].includes(value)) {
+      //     throw new Error("Gender data is not valid");
+      //   }
+      // },
     },
     photoUrl: {
       type: String,
@@ -63,10 +67,11 @@ const userSchema = new mongoose.Schema(
     about: {
       type: String,
       default: "Default About of User",
-      maxLength: 50,
+      maxLength: 200,
     },
     skills: {
       type: [String],
+      maxLength: 20,
     },
   },
   {
@@ -92,20 +97,5 @@ userSchema.methods.validatePassword = async function (passwordInputByUser) {
   );
   return isPasswordValide;
 };
-
-//email check
-// userSchema.pre("save", async function (next) {
-//   const existingUser = await mongoose.models.User.findOne({
-//     emailId: this.emailId,
-//   });
-
-//   if (existingUser) {
-//     const err = new Error("Email already exists");
-//     err.status = 400;
-//     return next(err);
-//   }
-
-//   next();
-// });
 
 module.exports = mongoose.model("User", userSchema);

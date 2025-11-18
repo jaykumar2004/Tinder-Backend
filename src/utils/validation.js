@@ -12,9 +12,20 @@ const validateSignupData = (req) => {
   } else if (!validator.isStrongPassword(password)) {
     throw new Error("Please enter a strong password.");
   }
+
+  if (firstName && !/^[A-Z]/.test(firstName)) {
+    throw new Error("First Name should be capital");
+  } else if (lastName && !/^[A-Z]/.test(lastName)) {
+    throw new Error("Last Name should be capital");
+  }
 };
 
 const validateEditProfileData = (req) => {
+  const { skills, age } = req.body;
+  if (skills.length > 20) {
+    throw new Error("Skills cannot be greater than 20");
+  }
+
   const allowedEditFields = [
     "firstName",
     "lastName",
