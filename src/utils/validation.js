@@ -21,11 +21,33 @@ const validateSignupData = (req) => {
 };
 
 const validateEditProfileData = (req) => {
-  const { skills, age } = req.body;
-  if (skills.length > 20) {
-    throw new Error("Skills cannot be greater than 20");
+  const { skills, age, firstName, lastName } = req.body;
+
+  // Skills validation (only if provided)
+  if (skills) {
+    if (!Array.isArray(skills)) {
+      throw new Error("Skills must be an array");
+    }
+    if (skills.length > 20) {
+      throw new Error("Skills cannot be greater than 20");
+    }
   }
 
+  // Name validation (only if user tries to change them)
+  if (firstName && firstName.length < 3) {
+    throw new Error("First Name must be at least 3 chars");
+  }
+
+  if (lastName && lastName.length < 3) {
+    throw new Error("Last Name must be at least 3 chars");
+  }
+
+  // Age validation
+  if (age && age < 18) {
+    throw new Error("Age must be 18 or above");
+  }
+
+  // Allowed fields validation
   const allowedEditFields = [
     "firstName",
     "lastName",
@@ -39,7 +61,12 @@ const validateEditProfileData = (req) => {
   const isEditAllowed = Object.keys(req.body).every((field) =>
     allowedEditFields.includes(field)
   );
-  return isEditAllowed;
+
+  if (!isEditAllowed) {
+    throw new Error("Invalid Edit Request");
+  }
+
+  return true;
 };
 
 module.exports = {
